@@ -22,3 +22,11 @@ npm-debug.log*
 .DS_Store
 frontend/.git/
 .vercel/
+
+# Local agent/editor instructions and generated integrations
+frontend/AGENTS.md
+frontend/README.md
+backend/.agents/
+backend/.claude/
+backend/.cursor/
+backend/.devin/
