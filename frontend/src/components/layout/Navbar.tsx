@@ -9,6 +9,7 @@ import {
   Shield,
   HardDrive,
   ChevronDown,
+  Settings,
 } from "lucide-react";
 import { useAuth } from "@/providers/AuthProvider";
 import { Badge } from "@/components/common/Badge";
@@ -99,6 +100,13 @@ export function Navbar() {
                   {user?.email}
                 </p>
               </div>
+              <Link
+                href="/profile"
+                className="flex items-center gap-2 px-3 py-2 text-xs text-slate-600 hover:bg-slate-50"
+              >
+                <Settings className="h-3.5 w-3.5" />
+                Profile settings
+              </Link>
               <button
                 onClick={logout}
                 className="flex w-full items-center gap-2 px-3 py-2 text-xs text-rose-600 hover:bg-rose-50 transition-colors"

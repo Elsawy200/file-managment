@@ -60,6 +60,26 @@ export const adminController = {
     }
   },
 
+  async updateUser(req: Request, res: Response, next: NextFunction) {
+    try {
+      const authReq = req as AuthAdminRequest;
+      const targetUserId = Number(req.params.id);
+      const updatedUser = await adminService.updateUser(
+        authReq.user.id,
+        targetUserId,
+        req.body,
+      );
+
+      res.json({
+        success: true,
+        message: "User updated successfully.",
+        data: updatedUser,
+      });
+    } catch (err) {
+      next(err);
+    }
+  },
+
   
   async deleteUser(req: Request, res: Response, next: NextFunction) {
     try {

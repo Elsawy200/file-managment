@@ -15,8 +15,8 @@ if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }
 
-// 15 MB file size limit
-const MAX_FILE_SIZE_BYTES = 15 * 1024 * 1024;
+// 5 MB file size limit
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 const MAX_FILES_COUNT = 10;
 
 // Allowed MIME types

@@ -75,10 +75,12 @@ export interface FileStatistics {
 }
 
 export interface AdminDashboardStatistics {
-  totalUsers: number;
-  verifiedUsers: number;
-  totalFiles: number;
-  totalStorageBytes: number;
+  metrics: {
+    totalUsers: number;
+    verifiedUsers: number;
+    totalFiles: number;
+    totalStorageBytes: number;
+  };
   mostUploadedFileTypes: {
     mimeType: string;
     displayName: string;

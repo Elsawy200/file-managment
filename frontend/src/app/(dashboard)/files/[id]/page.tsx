@@ -51,6 +51,7 @@ export default function FileDetailsPage({ params }: Params) {
   }
 
   const category = getFileCategory(file.mimeType);
+  const isImage = file.mimeType.startsWith("image/");
 
   return (
     <div className="space-y-5">
@@ -114,6 +115,22 @@ export default function FileDetailsPage({ params }: Params) {
           </div>
         </div>
       </motion.div>
+
+      {isImage && (
+        <motion.div
+          initial={{ opacity: 0, y: 8 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="rounded-2xl border border-slate-100 bg-white p-5 shadow-sm shadow-slate-50"
+        >
+          <h2 className="mb-3 text-sm font-semibold text-slate-800">Image Preview</h2>
+          <img
+            src={file.path}
+            alt={file.originalName}
+            className="max-h-[32rem] w-full rounded-xl bg-slate-50 object-contain"
+          />
+        </motion.div>
+      )}
 
       {file.extractedText && (
         <motion.div

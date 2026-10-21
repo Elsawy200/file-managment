@@ -12,31 +12,32 @@ interface AdminStatsProps {
 }
 
 export function AdminStats({ stats, isLoading }: AdminStatsProps) {
+  const metrics = stats?.metrics;
   const cards = [
     {
       label: "Total Users",
-      display: String(stats?.totalUsers ?? 0),
+      display: String(metrics?.totalUsers ?? 0),
       icon: Users,
       color: "text-indigo-500",
       bg: "bg-indigo-50",
     },
     {
       label: "Verified Users",
-      display: String(stats?.verifiedUsers ?? 0),
+      display: String(metrics?.verifiedUsers ?? 0),
       icon: CheckCircle,
       color: "text-emerald-500",
       bg: "bg-emerald-50",
     },
     {
       label: "Total Files",
-      display: String(stats?.totalFiles ?? 0),
+      display: String(metrics?.totalFiles ?? 0),
       icon: Files,
       color: "text-amber-500",
       bg: "bg-amber-50",
     },
     {
       label: "Total Storage",
-      display: formatBytes(stats?.totalStorageBytes ?? 0),
+      display: formatBytes(metrics?.totalStorageBytes ?? 0),
       icon: HardDrive,
       color: "text-rose-500",
       bg: "bg-rose-50",

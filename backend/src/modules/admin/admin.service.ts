@@ -82,8 +82,12 @@ export const adminService = {
   },
 
 
-  async updateUserRole(currentAdminId: number, targetUserId: number, newRole: Role) {
-    if (currentAdminId === targetUserId && newRole !== Role.ADMIN) {
+  async updateUser(
+    currentAdminId: number,
+    targetUserId: number,
+    input: { name?: string; role?: Role; emailVerified?: boolean },
+  ) {
+    if (currentAdminId === targetUserId && input.role !== undefined && input.role !== Role.ADMIN) {
       throw new BadRequestError("You cannot remove administrator privileges from your own account.");
     }
 
@@ -97,7 +101,7 @@ export const adminService = {
 
     const updatedUser = await prisma.user.update({
       where: { id: targetUserId },
-      data: { role: newRole },
+      data: input,
       select: {
         id: true,
         name: true,
@@ -109,6 +113,10 @@ export const adminService = {
     });
 
     return updatedUser;
+  },
+
+  async updateUserRole(currentAdminId: number, targetUserId: number, newRole: Role) {
+    return this.updateUser(currentAdminId, targetUserId, { role: newRole });
   },
 
   async deleteUser(currentAdminId: number, targetUserId: number) {

@@ -36,3 +36,16 @@ export const resetPasswordSchema = z.object({
       .max(72, "Password must be at most 72 characters"),
   }),
 });
+
+export const updateProfileSchema = z.object({
+  body: z
+    .object({
+      name: z.string().trim().min(2).max(60).optional(),
+      email: email.optional(),
+      password: z.string().min(8, "Password must be at least 8 characters").max(72, "Password must be at most 72 characters").optional(),
+    })
+    .refine(
+      (data) => data.name !== undefined || data.email !== undefined || data.password !== undefined,
+      "Provide at least one field to update",
+    ),
+});

@@ -71,6 +71,40 @@ export function useUpdateUserRole() {
   });
 }
 
+export function useUpdateAdminUser() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      ...updates
+    }: {
+      id: number;
+      name?: string;
+      role?: Role;
+      emailVerified?: boolean;
+    }) => {
+      const { data } = await api.patch<SingleResponse<User>>(
+        `/admin/users/${id}`,
+        updates,
+      );
+      return data;
+    },
+    onSuccess: (data) => {
+      toast.success(data.message || "User updated successfully");
+      queryClient.invalidateQueries({ queryKey: ["admin", "users"] });
+      queryClient.invalidateQueries({ queryKey: ["admin", "dashboard"] });
+    },
+    onError: (error: unknown) => {
+      const message =
+        typeof error === "object" && error !== null && "response" in error
+          ? (error as { response?: { data?: { message?: string } } }).response?.data?.message
+          : undefined;
+      toast.error(message || "Failed to update user");
+    },
+  });
+}
+
 export function useDeleteUser() {
   const queryClient = useQueryClient();
 

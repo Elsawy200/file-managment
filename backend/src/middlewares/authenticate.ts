@@ -11,7 +11,15 @@ export const authenticate = (
   if (!header?.startsWith("Bearer "))
     throw new UnauthorizedError("Authentication required");
 
-  const payload = verifyAccessToken(header.slice(7));
+  let payload;
+  try {
+    payload = verifyAccessToken(header.slice(7));
+  } catch {
+    throw new UnauthorizedError(
+      "Your session has expired. Please sign in again.",
+      "TOKEN_EXPIRED",
+    );
+  }
   (req as Request & { user: { id: number; role: typeof payload.role } }).user = {
     id: Number(payload.sub),
     role: payload.role,

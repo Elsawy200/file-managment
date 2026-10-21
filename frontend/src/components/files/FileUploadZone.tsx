@@ -6,6 +6,9 @@ import { Upload, X, FileText, CheckCircle } from "lucide-react";
 import { Button } from "@/components/common/Button";
 import { useUploadFiles } from "@/hooks/useFiles";
 import { formatBytes } from "@/lib/utils";
+import { toast } from "sonner";
+
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
 
 interface PendingFile {
   id: string;
@@ -18,10 +21,21 @@ export function FileUploadZone() {
   const { mutate: upload, isPending } = useUploadFiles();
 
   const addFiles = useCallback((incoming: File[]) => {
-    const entries = incoming.map((f) => ({
+    const oversizedFiles = incoming.filter((file) => file.size > MAX_FILE_SIZE_BYTES);
+    if (oversizedFiles.length > 0) {
+      toast.error(
+        `${oversizedFiles.map((file) => file.name).join(", ")} ${
+          oversizedFiles.length === 1 ? "exceeds" : "exceed"
+        } the 5 MB file limit.`,
+      );
+    }
+
+    const entries = incoming
+      .filter((file) => file.size <= MAX_FILE_SIZE_BYTES)
+      .map((f) => ({
       id: `${f.name}-${Date.now()}-${Math.random()}`,
       file: f,
-    }));
+      }));
     setPendingFiles((prev) => [...prev, ...entries]);
   }, []);
 
@@ -86,7 +100,7 @@ export function FileUploadZone() {
             {isDragging ? "Drop files here" : "Drag & drop or click to upload"}
           </p>
           <p className="mt-0.5 text-xs text-slate-400">
-            PDF, Word, Images, Text, Spreadsheets
+            PDF, Word, Images, Text, Spreadsheets · Max 5 MB per file
           </p>
         </div>
         <input

@@ -1,11 +1,12 @@
 import type { Request, Response, NextFunction } from "express";
 import { filesService } from "./files.service.js";
 import { BadRequestError } from "../../utils/app-error.js";
+import { Role } from "@prisma/client";
 
 type AuthRequest = Request & {
   user: {
     id: number;
-    role: string;
+    role: Role;
   };
 };
 
@@ -55,7 +56,7 @@ export const filesController = {
       const authReq = req as AuthRequest;
       const fileId = Number(req.params.id);
 
-      const file = await filesService.getFileById(authReq.user.id, fileId);
+      const file = await filesService.getFileById(authReq.user.id, authReq.user.role, fileId);
 
       res.json({
         success: true,
@@ -72,7 +73,7 @@ export const filesController = {
       const authReq = req as AuthRequest;
       const fileId = Number(req.params.id);
 
-      const file = await filesService.getFileById(authReq.user.id, fileId);
+      const file = await filesService.getFileById(authReq.user.id, authReq.user.role, fileId);
 
       if (file.path.startsWith("http://") || file.path.startsWith("https://")) {
         return res.redirect(file.path);

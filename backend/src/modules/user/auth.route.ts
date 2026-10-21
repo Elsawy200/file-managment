@@ -7,8 +7,8 @@ import {
   verifyEmailSchema,
   emailOnlySchema,
   resetPasswordSchema,
+  updateProfileSchema,
 } from "./auth.schema.js";
-import { authorize } from "../../middlewares/authorize.js";
 import {authenticate} from '../../middlewares/authenticate.js'
 
 const router = express.Router();
@@ -40,7 +40,8 @@ router.post(
   authController.resetPassword,
 );
 
-router.get("/profile", authenticate, authorize("USER"), authController.profile);
+router.get("/profile", authenticate, authController.profile);
+router.patch("/profile", authenticate, validate(updateProfileSchema), authController.updateProfile);
 
 
 

@@ -19,6 +19,22 @@ export const updateRoleSchema = z.object({
   }),
 });
 
+export const updateUserSchema = z.object({
+  params: z.object({
+    id: z.coerce.number().int().positive("Invalid user ID"),
+  }),
+  body: z
+    .object({
+      name: z.string().trim().min(2).max(60).optional(),
+      role: z.nativeEnum(Role).optional(),
+      emailVerified: z.boolean().optional(),
+    })
+    .refine(
+      (data) => data.name !== undefined || data.role !== undefined || data.emailVerified !== undefined,
+      "Provide at least one field to update",
+    ),
+});
+
 export const userIdParamSchema = z.object({
   params: z.object({
     id: z.coerce.number().int().positive("Invalid user ID"),

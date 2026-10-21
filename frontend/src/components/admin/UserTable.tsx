@@ -1,13 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Trash2, Shield, User as UserIcon } from "lucide-react";
+import { Search, Trash2, Shield, User as UserIcon, Pencil, CheckCircle } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
 import { Badge } from "@/components/common/Badge";
 import { Skeleton } from "@/components/common/Skeleton";
-import { useAdminUsers, useUpdateUserRole, useDeleteUser } from "@/hooks/useAdmin";
+import { useAdminUsers, useUpdateUserRole, useUpdateAdminUser, useDeleteUser } from "@/hooks/useAdmin";
 import { formatDate } from "@/lib/utils";
 import type { AdminUserFilterParams, User, Role } from "@/types";
 
@@ -19,9 +19,12 @@ export function UserTable() {
   const [searchInput, setSearchInput] = useState("");
   const [confirmDelete, setConfirmDelete] = useState<User | null>(null);
   const [confirmRole, setConfirmRole] = useState<{ user: User; role: Role } | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
+  const [name, setName] = useState("");
 
   const { data, isLoading } = useAdminUsers(params);
   const { mutate: updateRole, isPending: roleLoading } = useUpdateUserRole();
+  const { mutate: updateUser, isPending: updateLoading } = useUpdateAdminUser();
   const { mutate: deleteUser, isPending: deleteLoading } = useDeleteUser();
 
   const users = data?.data ?? [];
@@ -124,6 +127,27 @@ export function UserTable() {
                         <Button
                           variant="ghost"
                           size="sm"
+                          title="Edit name"
+                          onClick={() => {
+                            setEditingUser(user);
+                            setName(user.name);
+                          }}
+                        >
+                          <Pencil className="h-3.5 w-3.5" />
+                        </Button>
+                        {!user.emailVerified && (
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            title="Verify user"
+                            onClick={() => updateUser({ id: user.id, emailVerified: true })}
+                          >
+                            <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+                          </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           onClick={() => setConfirmDelete(user)}
                           className="text-rose-500 hover:bg-rose-50 hover:text-rose-600"
                         >
@@ -192,6 +216,38 @@ export function UserTable() {
             }}
           >
             Delete User
+          </Button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={!!editingUser}
+        onClose={() => setEditingUser(null)}
+        title="Edit User"
+      >
+        <label className="block text-xs font-medium text-slate-600">
+          Name
+          <input
+            value={name}
+            onChange={(event) => setName(event.target.value)}
+            className="mt-1.5 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:border-indigo-400 focus:outline-none focus:ring-2 focus:ring-indigo-100"
+          />
+        </label>
+        <div className="mt-5 flex justify-end gap-2">
+          <Button variant="outline" size="sm" onClick={() => setEditingUser(null)}>
+            Cancel
+          </Button>
+          <Button
+            variant="primary"
+            size="sm"
+            isLoading={updateLoading}
+            onClick={() => {
+              if (editingUser) {
+                updateUser({ id: editingUser.id, name }, { onSuccess: () => setEditingUser(null) });
+              }
+            }}
+          >
+            Save
           </Button>
         </div>
       </Modal>

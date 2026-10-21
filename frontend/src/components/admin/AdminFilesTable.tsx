@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { Search, Trash2, FileX } from "lucide-react";
+import { Search, Trash2, FileX, Eye } from "lucide-react";
+import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@/components/common/Button";
 import { Modal } from "@/components/common/Modal";
@@ -113,6 +114,11 @@ export function AdminFilesTable() {
                     </td>
                     <td className="px-4 py-3">
                       <div className="flex justify-end">
+                        <Link href={`/files/${file.id}`}>
+                          <Button variant="ghost" size="sm" title="View file">
+                            <Eye className="h-3.5 w-3.5" />
+                          </Button>
+                        </Link>
                         <Button
                           variant="ghost"
                           size="sm"

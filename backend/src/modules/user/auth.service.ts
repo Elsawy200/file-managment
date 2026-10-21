@@ -105,4 +105,36 @@ export const authService = {
     if (!user) throw new UnauthorizedError("User no longer exists");
     return toSafeUser(user);
   },
+
+  async updateProfile(
+    userId: number,
+    input: { name?: string; email?: string; password?: string },
+  ) {
+    const user = await prisma.user.findUnique({ where: { id: userId } });
+    if (!user) throw new UnauthorizedError("User no longer exists");
+
+    if (input.email && input.email !== user.email) {
+      const emailInUse = await prisma.user.findUnique({ where: { email: input.email } });
+      if (emailInUse) throw new ConflictError("Email already in use");
+    }
+
+    const emailChanged = input.email !== undefined && input.email !== user.email;
+    const updatedUser = await prisma.user.update({
+      where: { id: userId },
+      data: {
+        ...(input.name !== undefined ? { name: input.name } : {}),
+        ...(input.email !== undefined ? { email: input.email } : {}),
+        ...(input.password !== undefined
+          ? { password: await bcrypt.hash(input.password, SALT_ROUNDS) }
+          : {}),
+        ...(emailChanged ? { emailVerified: false } : {}),
+      },
+    });
+
+    if (emailChanged) {
+      await otpService.send(updatedUser.email, "EMAIL_VERIFICATION");
+    }
+
+    return toSafeUser(updatedUser);
+  },
 };

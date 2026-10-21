@@ -3,7 +3,7 @@ import { prisma } from "../../lib/prisma.js";
 import { uploadToCloudinary, deleteFromCloudinary } from "../../lib/cloudinary.js";
 import { extractFileContent } from "./content-extractor.js";
 import { NotFoundError, BadRequestError } from "../../utils/app-error.js";
-import { Prisma } from "@prisma/client";
+import { Prisma, Role } from "@prisma/client";
 
 interface ListFilesFilter {
   page: number;
@@ -155,12 +155,15 @@ export const filesService = {
   },
 
 
-  async getFileById(userId: number, fileId: number) {
+  async getFileById(userId: number, role: Role, fileId: number) {
     const file = await prisma.file.findFirst({
       where: {
         id: fileId,
-        userId,
+        ...(role === Role.ADMIN ? {} : { userId }),
       },
+      ...(role === Role.ADMIN
+        ? { include: { user: { select: { id: true, name: true, email: true } } } }
+        : {}),
     });
 
     if (!file) {

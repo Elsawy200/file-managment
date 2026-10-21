@@ -23,14 +23,17 @@ export const otpService = {
       where: { email_purpose: { email, purpose } },
     });
 
-    if (
-      existing &&
-      Date.now() - existing.createdAt.getTime() < RESEND_COOLDOWN_SEC * 1000
-    ) {
+    const elapsedMs = existing ? Date.now() - existing.createdAt.getTime() : 0;
+    if (existing && elapsedMs < RESEND_COOLDOWN_SEC * 1000) {
       throw new AppError(
         "Please wait before requesting another code",
         429,
         "OTP_COOLDOWN",
+        {
+          retryAfterSeconds: Math.ceil(
+            (RESEND_COOLDOWN_SEC * 1000 - elapsedMs) / 1000,
+          ),
+        },
       );
     }
 

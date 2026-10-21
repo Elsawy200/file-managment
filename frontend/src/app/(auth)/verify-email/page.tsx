@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { motion } from "framer-motion";
@@ -18,7 +18,22 @@ function VerifyEmailForm() {
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [isLoading, setIsLoading] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+  const [resendSeconds, setResendSeconds] = useState(0);
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
+
+  useEffect(() => {
+    if (resendSeconds <= 0) return;
+    const intervalId = window.setInterval(() => {
+      setResendSeconds((seconds) => Math.max(0, seconds - 1));
+    }, 1000);
+    return () => window.clearInterval(intervalId);
+  }, [resendSeconds]);
+
+  const resendLabel = `Resend code${
+    resendSeconds > 0
+      ? ` in ${Math.floor(resendSeconds / 60)}:${String(resendSeconds % 60).padStart(2, "0")}`
+      : ""
+  }`;
 
   const handleChange = (index: number, value: string) => {
     if (!/^\d?$/.test(value)) return;
@@ -60,7 +75,7 @@ function VerifyEmailForm() {
       toast.success("Email verified! You can now sign in.");
       router.push("/login");
     } catch (error: any) {
-      const message = error.response?.data?.message || "Invalid or expired code";
+      const message = error.response?.data?.error?.message || "Invalid or expired code";
       toast.error(message);
     } finally {
       setIsLoading(false);
@@ -72,8 +87,14 @@ function VerifyEmailForm() {
     try {
       await api.post("/auth/resend-verification", { email });
       toast.success("A new code was sent to your email.");
+      setResendSeconds(60);
     } catch (error: any) {
-      const message = error.response?.data?.message || "Failed to resend code";
+      const responseError = error.response?.data?.error;
+      const retryAfterSeconds = responseError?.details?.retryAfterSeconds;
+      if (typeof retryAfterSeconds === "number") {
+        setResendSeconds(retryAfterSeconds);
+      }
+      const message = responseError?.message || "Failed to resend code";
       toast.error(message);
     } finally {
       setResendLoading(false);
@@ -137,9 +158,10 @@ function VerifyEmailForm() {
               size="sm"
               onClick={handleResend}
               isLoading={resendLoading}
+              disabled={resendSeconds > 0}
               className="text-indigo-600 hover:text-indigo-700"
             >
-              Resend code
+              {resendLabel}
             </Button>
             <div className="pt-1">
               <Link

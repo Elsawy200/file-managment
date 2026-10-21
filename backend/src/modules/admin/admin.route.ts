@@ -6,6 +6,7 @@ import { validate } from "../../middlewares/validate.js";
 import {
   listUsersSchema,
   updateRoleSchema,
+  updateUserSchema,
   userIdParamSchema,
   listAdminFilesSchema,
   fileIdParamSchema,
@@ -26,6 +27,7 @@ router.patch(
   validate(updateRoleSchema),
   adminController.updateUserRole,
 );
+router.patch("/users/:id", validate(updateUserSchema), adminController.updateUser);
 router.delete(
   "/users/:id",
   validate(userIdParamSchema),
