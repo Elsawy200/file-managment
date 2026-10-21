@@ -26,6 +26,7 @@ export function UserTable() {
 
   const users = data?.data ?? [];
   const pagination = data?.pagination;
+  const currentPage = pagination?.currentPage ?? pagination?.page ?? params.page ?? 1;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -141,14 +142,14 @@ export function UserTable() {
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           <p className="text-xs text-slate-500">
-            {pagination.totalItems} users · Page {pagination.page} of {pagination.totalPages}
+            {pagination.totalItems} users · Page {currentPage} of {pagination.totalPages}
           </p>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               disabled={!pagination.hasPrevPage}
-              onClick={() => handlePage(pagination.page - 1)}
+              onClick={() => handlePage(currentPage - 1)}
             >
               Previous
             </Button>
@@ -156,7 +157,7 @@ export function UserTable() {
               variant="outline"
               size="sm"
               disabled={!pagination.hasNextPage}
-              onClick={() => handlePage(pagination.page + 1)}
+              onClick={() => handlePage(currentPage + 1)}
             >
               Next
             </Button>

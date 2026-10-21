@@ -25,6 +25,7 @@ export function AdminFilesTable() {
 
   const files = data?.data ?? [];
   const pagination = data?.pagination;
+  const currentPage = pagination?.currentPage ?? pagination?.page ?? params.page ?? 1;
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,14 +134,14 @@ export function AdminFilesTable() {
       {pagination && pagination.totalPages > 1 && (
         <div className="flex items-center justify-between pt-2">
           <p className="text-xs text-slate-500">
-            {pagination.totalItems} files · Page {pagination.page} of {pagination.totalPages}
+            {pagination.totalItems} files · Page {currentPage} of {pagination.totalPages}
           </p>
           <div className="flex gap-2">
             <Button
               variant="outline"
               size="sm"
               disabled={!pagination.hasPrevPage}
-              onClick={() => handlePage(pagination.page - 1)}
+              onClick={() => handlePage(currentPage - 1)}
             >
               Previous
             </Button>
@@ -148,7 +149,7 @@ export function AdminFilesTable() {
               variant="outline"
               size="sm"
               disabled={!pagination.hasNextPage}
-              onClick={() => handlePage(pagination.page + 1)}
+              onClick={() => handlePage(currentPage + 1)}
             >
               Next
             </Button>
