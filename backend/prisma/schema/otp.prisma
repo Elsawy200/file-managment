@@ -1,0 +1,16 @@
+enum OtpPurpose {
+    EMAIL_VERIFICATION
+    PASSWORD_RESET
+}
+
+model Otp {
+    id        Int        @id @default(autoincrement())
+    email     String
+    purpose   OtpPurpose
+    codeHash  String
+    attempts  Int        @default(0)
+    expiresAt DateTime
+    createdAt DateTime   @default(now())
+
+    @@unique([email, purpose])
+}

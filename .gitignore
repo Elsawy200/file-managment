@@ -1,0 +1,24 @@
+# Secrets and local environment files
+.env
+.env.*
+!.env.example
+
+# Dependencies and generated output
+**/node_modules/
+**/dist/
+**/.next/
+**/coverage/
+**/*.tsbuildinfo
+**/next-env.d.ts
+
+# Local uploads and logs
+backend/uploads/*
+backend/src/scratch.ts
+**/*.log
+npm-debug.log*
+
+# Local editor and nested frontend Git metadata
+.idea/
+.DS_Store
+frontend/.git/
+.vercel/
