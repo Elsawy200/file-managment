@@ -13,6 +13,19 @@ export const sendMail = async (to: string, subject: string, html: string) => {
   try {
     await transporter.sendMail({ from: env.MAIL_FROM, to, subject, html });
   } catch (err) {
+    const smtpError = err as {
+      name?: string;
+      code?: string;
+      command?: string;
+      responseCode?: number;
+    };
+    // Log transport diagnostics only; never log SMTP credentials or message content.
+    console.error("SMTP email delivery failed", {
+      name: smtpError.name,
+      code: smtpError.code,
+      command: smtpError.command,
+      responseCode: smtpError.responseCode,
+    });
     throw new AppError(
       "Could not send email, try again later",
       502,

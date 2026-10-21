@@ -42,20 +42,29 @@ export const otpService = {
       expiresAt: new Date(Date.now() + OTP_TTL_MIN * 60 * 1000),
     };
 
+    const codeHash = hashCode(email, purpose, code);
     await prisma.otp.upsert({
       where: { email_purpose: { email, purpose } },
-      create: { email, purpose, ...data },
-      update: data,
+      create: { email, purpose, ...data, codeHash },
+      update: { ...data, codeHash },
     });
 
     const isPasswordReset = purpose === "PASSWORD_RESET";
-    await sendMail(
-      email,
-      isPasswordReset ? "Reset your password" : "Your verification code",
-      isPasswordReset
-        ? passwordResetEmail(code, OTP_TTL_MIN)
-        : otpEmail(code, OTP_TTL_MIN),
-    );
+    try {
+      await sendMail(
+        email,
+        isPasswordReset ? "Reset your password" : "Your verification code",
+        isPasswordReset
+          ? passwordResetEmail(code, OTP_TTL_MIN)
+          : otpEmail(code, OTP_TTL_MIN),
+      );
+    } catch (error) {
+      // Remove only this failed attempt, in case another request replaced it meanwhile.
+      await prisma.otp.deleteMany({
+        where: { email, purpose, codeHash },
+      });
+      throw error;
+    }
   },
 
   async verify(email: string, purpose: OtpPurpose, code: string) {
