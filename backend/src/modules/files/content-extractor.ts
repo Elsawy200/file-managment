@@ -1,4 +1,5 @@
 import fs from "node:fs/promises";
+import { CanvasFactory } from "pdf-parse/worker";
 import { PDFParse } from "pdf-parse";
 import mammoth from "mammoth";
 import * as XLSX from "xlsx";
@@ -20,7 +21,7 @@ export const extractFileContent = async (
   try {
     if (mimeType === "application/pdf") {
       const buffer = await fs.readFile(filePath);
-      const parser = new PDFParse({ data: buffer });
+      const parser = new PDFParse({ data: buffer, CanvasFactory });
       const [parsedText, info] = await Promise.all([
         parser.getText().catch(() => null),
         parser.getInfo().catch(() => null),
