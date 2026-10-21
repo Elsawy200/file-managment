@@ -1,12 +1,16 @@
 import multer, { FileFilterCallback, MulterError } from "multer";
 import path from "node:path";
 import fs from "node:fs";
+import os from "node:os";
 import crypto from "node:crypto";
 import type { Request, Response, NextFunction } from "express";
 import { BadRequestError } from "../utils/app-error.js";
 
-// Ensure uploads directory exists
-const UPLOAD_DIR = path.resolve(process.cwd(), "uploads");
+// Vercel's deployed application directory is read-only. Use its writable
+// temporary filesystem for the short-lived file needed before Cloudinary upload.
+const UPLOAD_DIR = process.env.VERCEL
+  ? path.join(os.tmpdir(), "goldera-uploads")
+  : path.resolve(process.cwd(), "uploads");
 if (!fs.existsSync(UPLOAD_DIR)) {
   fs.mkdirSync(UPLOAD_DIR, { recursive: true });
 }

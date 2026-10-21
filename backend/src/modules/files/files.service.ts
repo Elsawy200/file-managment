@@ -24,39 +24,46 @@ export const filesService = {
 
     const createdRecords = [];
 
-    for (const file of files) {
-      let extractedText: string | null = null;
-      let extractionMeta: Record<string, unknown> = {};
+    try {
+      for (const file of files) {
+        let extractedText: string | null = null;
+        let extractionMeta: Record<string, unknown> = {};
 
-      if (!file.mimetype.startsWith("image/")) {
-        const extraction = await extractFileContent(file.path, file.mimetype);
-        extractedText = extraction.text;
-        extractionMeta = extraction.meta;
+        if (!file.mimetype.startsWith("image/")) {
+          const extraction = await extractFileContent(file.path, file.mimetype);
+          extractedText = extraction.text;
+          extractionMeta = extraction.meta;
+        }
+
+        const cloudResult = await uploadToCloudinary(file.path);
+
+        const record = await prisma.file.create({
+          data: {
+            userId,
+            originalName: file.originalname,
+            storedName: cloudResult.publicId,
+            mimeType: file.mimetype,
+            size: file.size,
+            path: cloudResult.secureUrl,
+            extractedText,
+            extractedMeta: {
+              provider: "cloudinary",
+              resourceType: cloudResult.resourceType,
+              format: cloudResult.format,
+              width: cloudResult.width,
+              height: cloudResult.height,
+              ...extractionMeta,
+            } as Prisma.InputJsonValue,
+          },
+        });
+
+        createdRecords.push(record);
       }
-
-      const cloudResult = await uploadToCloudinary(file.path);
-
-      const record = await prisma.file.create({
-        data: {
-          userId,
-          originalName: file.originalname,
-          storedName: cloudResult.publicId,
-          mimeType: file.mimetype,
-          size: file.size,
-          path: cloudResult.secureUrl,
-          extractedText,
-          extractedMeta: {
-            provider: "cloudinary",
-            resourceType: cloudResult.resourceType,
-            format: cloudResult.format,
-            width: cloudResult.width,
-            height: cloudResult.height,
-            ...extractionMeta,
-          } as Prisma.InputJsonValue,
-        },
-      });
-
-      createdRecords.push(record);
+    } finally {
+      // Vercel's /tmp storage is ephemeral and can be reused by warm instances.
+      await Promise.all(
+        files.map((file) => fs.unlink(file.path).catch(() => undefined)),
+      );
     }
 
     return createdRecords;
