@@ -11,7 +11,7 @@ import { useAuth } from "@/providers/AuthProvider";
 import { api } from "@/lib/api";
 import { toast } from "sonner";
 import type { AuthResponse } from "@/types";
-
+ 
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
